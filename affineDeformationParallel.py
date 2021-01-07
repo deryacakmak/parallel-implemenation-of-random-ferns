@@ -147,14 +147,12 @@ __global__ void affineDeformation(float *M, int *in, int *out, int newWidth, int
     int newCol = Col * M[0] + Row * M[1] + M[2];
     int newRow = Col * M[3] + Row * M[4] + M[5];
     
-    int i = 0;
     
     if(Col < oldWidth && Row < oldHeight){
-             i++;
+
              out[newRow * newWidth + newCol] = in[oldWidth * Row +Col];
             
             }    
-    printf("%d",i);
 
   } """)
   
@@ -163,7 +161,7 @@ img = img.astype(np.int32)
 
 affineDeformation = mod.get_function("affineDeformation")
 
-print(width*height)
+
 affineDeformation(
         drv.In(matrixM),
         drv.In(img),
