@@ -1,9 +1,11 @@
 import cv2
+
+import pycuda.autoinit
+import pycuda.driver as drv
+import pycuda.compiler as compiler
 import numpy as np
 import math
-import pycuda.driver as drv
-import pycuda.autoinit
-from pycuda.compiler import SourceModule
+
 
 def readImage(imageName):
     
@@ -130,46 +132,39 @@ matrixT = calculateMatrixT(affineMatrix, c1, c2)
 
 matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
 dim_block = 32
-dim_grid_x = math.ceil(width / dim_block)
-dim_grid_y = math.ceil(height / dim_block)
+dim_grid_x = math.ceil(newWidth / dim_block)
+dim_grid_y = math.ceil(newHeight / dim_block)
 
 outImg = np.zeros((newHeight, newWidth )).astype(np.int32)
-print(matrixM)
 
-mod = SourceModule("""
-__global__ void affineDeformation(float *M, int *in, int *out, int newWidth, int oldWidth, int oldHeight)
-  {
-    
-    int Col = blockIdx.x * blockDim.x + threadIdx.x;
- 	int Row = blockIdx.y * blockDim.y + threadIdx.y;
- 	
- 	
-    int newCol = Col * M[0] + Row * M[1] + M[2];
-    int newRow = Col * M[3] + Row * M[4] + M[5];
-    
-    
-    if(Col < oldWidth && Row < oldHeight){
 
-             out[newRow * newWidth + newCol] = in[oldWidth * Row +Col];
-            
-            }    
+mod = compiler.SourceModule(open('affine.cu').read())
 
-  } """)
-  
-  
+
 img = img.astype(np.int32)
 
+
+
+
 affineDeformation = mod.get_function("affineDeformation")
-
-
 affineDeformation(
         drv.In(matrixM),
         drv.In(img),
         drv.Out(outImg),
         np.int32(newWidth),
+        np.int32(newHeight),
         np.int32(width),
         np.int32(height),
         block=(dim_block, dim_block, 1),
         grid=(dim_grid_x, dim_grid_y,1)
     )
+
+
+uint_img = np.array(outImg*255).astype('uint8')
+
+grayImage = cv2.cvtColor(uint_img, cv2.COLOR_GRAY2BGR)
+
+cv2.imshow('Output', grayImage)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
