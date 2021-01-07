@@ -107,7 +107,8 @@ img = readImage('eiffel_tower.png')
 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-height, width = img.shape[:2]
+height, width = img.shape
+
 
 affineMatrix = generateAffineDeformationMatrixSIFTForm()
     
@@ -133,44 +134,44 @@ dim_grid_x = math.ceil(width / dim_block)
 dim_grid_y = math.ceil(height / dim_block)
 
 outImg = np.zeros((newHeight, newWidth )).astype(np.int32)
+print(matrixM)
 
 mod = SourceModule("""
-__global__ void affineDeformation(float *M, int *in, int *out, int newWidth, int oldWidth)
+__global__ void affineDeformation(float *M, int *in, int *out, int newWidth, int oldWidth, int oldHeight)
   {
     
     int Col = blockIdx.x * blockDim.x + threadIdx.x;
-	int Row = blockIdx.y * blockDim.y + threadIdx.y;
-	
-	
+ 	int Row = blockIdx.y * blockDim.y + threadIdx.y;
+ 	
+ 	
     int newCol = Col * M[0] + Row * M[1] + M[2];
     int newRow = Col * M[3] + Row * M[4] + M[5];
-        
     
-    out[newRow * newWidth + newCol] = in[oldWidth * Row +Col];
+    int i = 0;
     
-    
-  }
+    if(Col < oldWidth && Row < oldHeight){
+             i++;
+             out[newRow * newWidth + newCol] = in[oldWidth * Row +Col];
+            
+            }    
+    printf("%d",i);
+
+  } """)
   
-  """)
-
-
+  
 img = img.astype(np.int32)
 
 affineDeformation = mod.get_function("affineDeformation")
 
-
+print(width*height)
 affineDeformation(
         drv.In(matrixM),
         drv.In(img),
         drv.Out(outImg),
         np.int32(newWidth),
         np.int32(width),
+        np.int32(height),
         block=(dim_block, dim_block, 1),
-        grid=(dim_grid_x, dim_grid_y)
+        grid=(dim_grid_x, dim_grid_y,1)
     )
 
-
-# cv2.imwrite('color_img.jpg', outImg)
-# cv2.imshow('Output', outImg)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
