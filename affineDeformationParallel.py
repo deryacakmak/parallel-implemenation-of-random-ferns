@@ -107,6 +107,10 @@ def findNewImageShape(xCoordinates, yCoordinates):
 
 img = readImage('eiffel_tower.png')
 
+for i in img:
+    print(type(i[0][0]))
+    break
+
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 height, width = img.shape
@@ -135,13 +139,13 @@ dim_block = 32
 dim_grid_x = math.ceil(newWidth / dim_block)
 dim_grid_y = math.ceil(newHeight / dim_block)
 
-outImg = np.zeros((newHeight, newWidth )).astype(np.int32)
+outImg = np.zeros((newHeight, newWidth )).astype(np.uint8)
 
 
 mod = compiler.SourceModule(open('affine.cu').read())
 
 
-img = img.astype(np.int32)
+# img = img.astype(np.int32)
 
 
 
@@ -160,9 +164,9 @@ affineDeformation(
     )
 
 
-uint_img = np.array(outImg*255).astype('uint8')
+#uint_img = np.array(outImg*255).astype('uint8')
 
-grayImage = cv2.cvtColor(uint_img, cv2.COLOR_GRAY2BGR)
+grayImage = cv2.cvtColor(outImg, cv2.COLOR_GRAY2BGR)
 
 cv2.imshow('Output', grayImage)
 cv2.waitKey(0)
