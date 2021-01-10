@@ -1,5 +1,5 @@
 
-__global__ void affineDeformation(float *A, int *in, int *out, int newWidth, int newHeight ,int oldWidth, int oldHeight)
+__global__ void affineDeformation(float *A, unsigned char *in, unsigned char *out, int newWidth, int newHeight ,int oldWidth, int oldHeight)
   {
     
     int Col = blockIdx.x * blockDim.x + threadIdx.x;

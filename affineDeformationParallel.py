@@ -107,9 +107,7 @@ def findNewImageShape(xCoordinates, yCoordinates):
 
 img = readImage('eiffel_tower.png')
 
-for i in img:
-    print(type(i[0][0]))
-    break
+
 
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
