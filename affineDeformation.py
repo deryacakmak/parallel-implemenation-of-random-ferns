@@ -37,9 +37,8 @@ def generateAffineDeformationMatrix():
     Rgama = np.array(((cgama, -sgama), (sgama, cgama)))
     R2gama = np.array(((cgama, sgama), (-sgama, cgama)))
     
-    matrixA = np.dot(np.dot(np.dot(Rtetha, R2gama),[[a,0],[0,b]]),Rgama)
 
-    return matrixA 
+    return np.dot(np.dot(np.dot(Rtetha, R2gama),[[a,0],[0,b]]),Rgama)
 
 
 def generateAffineDeformationMatrixSIFTForm():
@@ -58,9 +57,8 @@ def generateAffineDeformationMatrixSIFTForm():
     t = 1/cgama
     T = [[t,0],[0,1]]
     
-    matrixA = lambdaParameter * np.dot(np.dot(Rtetha, T), Rgama)
     
-    return matrixA
+    return lambdaParameter * np.dot(np.dot(Rtetha, T), Rgama)
 
 def calculateMatrixT(A, c, c2):
     
