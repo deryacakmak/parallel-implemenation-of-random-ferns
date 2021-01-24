@@ -7,8 +7,11 @@ import time
 
 # T = [t1 t2]
 
-# M = [A B]
+# M = [A T]
 
+
+
+NUM_OF_IMAGES_TO_GENERATES = 1
 
 def readImage(imageName):
     
@@ -105,46 +108,83 @@ def findNewImageShape(xCoordinates, yCoordinates):
     newHeight = math.ceil(maxy-miny)
     
     return newWidth, newHeight
+
+
+
+def getNewImageShape(affineMatrix, width, height):
+    corners = findCorrespondingCornerInTheNewImage(affineMatrix, width, height)
+
+    xCoordinates = []
+    yCoordinates = []
+
+    for i in corners:
+        xCoordinates.append(i[0])
+        yCoordinates.append(i[1])
+
+    return findNewImageShape(xCoordinates, yCoordinates)
+
+
+def generateAffineMatrix():
+    affineMatrixes = []
+    for i in range(NUM_OF_IMAGES_TO_GENERATES):
+        affineMatrixes.append(generateAffineDeformationMatrixSIFTForm())
+    return affineMatrixes
     
 def main():
+    
 
-    start = time.time()
     print("->Loading images")
     
     img = readImage('eiffel_tower.png')
     
     height, width = img.shape[:2]
     
-    for i in range(1):
     
-        affineMatrix = generateAffineDeformationMatrixSIFTForm()
+    start = time.time()
     
-        corners = findCorrespondingCornerInTheNewImage(affineMatrix, width, height)
-
-        xCoordinates = []
-        yCoordinates = []
-
-        for i in corners:
-            xCoordinates.append(i[0])
-            yCoordinates.append(i[1])
-
-
-        newWidth, newHeight  = findNewImageShape(xCoordinates, yCoordinates)
+    numOfImage = 0
+    
+    affineMatrixes = generateAffineMatrix()
+    
+    while numOfImage != NUM_OF_IMAGES_TO_GENERATES:
+        
+        affineMatrix =affineMatrixes[numOfImage]
+    
+        newWidth, newHeight = getNewImageShape(affineMatrix, width, height)
 
         c1 = [width/2, height/2] # center of original image
         c2 = [newWidth/2, newHeight/2] # center of new image
 
-
         matrixT = calculateMatrixT(affineMatrix, c1, c2)
 
         matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
-
-        warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+        
+        try: 
+            warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+            # if(numOfImage<1250):
+            # 	cv2.imwrite("/home/derya/Desktop/affineDeformation/outputs/"+str(numOfImage)+".png", warp_dst)
+            # else:
+            #     cv2.imwrite("/home/derya/Desktop/affineDeformation/outputs2/"+str(numOfImage)+".png", warp_dst)
+            numOfImage = numOfImage +1
+            del warp_dst
+            del affineMatrix
+            del matrixT
+            del matrixM
+        except:
+            del affineMatrix
+            del matrixT
+            del matrixM
+            continue
+        
     
-        cv2.imshow('Output', warp_dst)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        # cv2.imshow('Output', warp_dst)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        #gc.collect()
+    
 
+    
+    
     end = time.time()
     print(f"Runtime of the program is {end - start}")
 
