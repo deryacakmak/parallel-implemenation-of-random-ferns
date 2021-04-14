@@ -122,23 +122,27 @@ def applyAffineDeformation(img):
     
 
     while True:
-        
-        # TODO invertable matrix check!  
-        affineMatrix = generateAffineDeformationMatrixSIFTForm() 
-    
-        newWidth, newHeight = getNewImageShape(affineMatrix, width, height)
 
-        c1 = [width/2, height/2] # center of original image
-        c2 = [newWidth/2, newHeight/2] # center of new image
-
-        matrixT = calculateMatrixT(affineMatrix, c1, c2)
-
-        matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
-        
         try:
-
-            warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+            
+            affineMatrix = generateAffineDeformationMatrixSIFTForm()
+            
     
+            np.linalg.inv(affineMatrix)
+    
+                
+            newWidth, newHeight = getNewImageShape(affineMatrix, width, height)
+    
+            c1 = [width/2, height/2] # center of original image
+            c2 = [newWidth/2, newHeight/2] # center of new image
+    
+            matrixT = calculateMatrixT(affineMatrix, c1, c2)
+    
+            matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
+            
+    
+            warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+        
             
             return warp_dst, matrixM
 
@@ -146,7 +150,11 @@ def applyAffineDeformation(img):
 
             continue
 
-    
+# img = readImage("eiffel_tower.png")
+
+# img, M, T = applyAffineDeformation(img)
+# print(M)
+# print(M.flatten())
 
 # if __name__ == "__main__":
 #     parser = argparse.ArgumentParser()
