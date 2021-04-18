@@ -5,7 +5,7 @@ import math
 from skimage.util import random_noise
 from affineDeformation import applyAffineDeformation
 
-allClasses = dict()
+
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
 FERN_NUMBER = 11
