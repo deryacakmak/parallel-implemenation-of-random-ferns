@@ -58,9 +58,9 @@ def findPixelIndex(width, x, y):
     return width*y+x
     
     
-def findPatch(pixelIndex, image):
-    start = int(pixelIndex- (PATCH_WIDTH/2))
-    end = int(pixelIndex + (PATCH_WIDTH/2))
+def findPatch(pixelIndex, image, patchWidth = PATCH_WIDTH):
+    start = int(pixelIndex- (patchWidth/2))
+    end = int(pixelIndex + (patchWidth/2))
     if start < 0: 
         start = 0 
     if end > image.shape[0]: 
@@ -73,10 +73,10 @@ def checkIntensityOfPixel(I1, I2):
     else:
         return 1
 
-def extractFeature(patch):
+def extractFeature(patch, numberOfFeatureEvaluatedPerPatch = NUMBER_OF_FEATURE_EVALUATED_PER_PATCH):
     features = []
     end = patch.shape[0] -1
-    while(len(features) != NUMBER_OF_FEATURE_EVALUATED_PER_PATCH):
+    while(len(features) != numberOfFeatureEvaluatedPerPatch):
         I1 = random.randint(0, end)
         I2 = random.randint(0, end)
         if abs(I1-I2) >3:
@@ -85,8 +85,8 @@ def extractFeature(patch):
 
 
 # tüm resimlerden gelen keypointe ait featureları fernlere böl
-def generateFerns(features):
-    S = math.ceil(len(features)/FERN_NUMBER)
+def generateFerns(features, fernNumber = FERN_NUMBER):
+    S = math.ceil(len(features)/fernNumber)
     random.shuffle(features)
     return [features[x:x+S] for x in range(0, len(features), S)]
 
@@ -107,10 +107,13 @@ def traningClass(ferns):
 
 def probablityDistrubition(classGraph, K):
     N = sum(classGraph.values())
+    classGraph[-1] = (REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)
     for k in classGraph:
         Nkc = classGraph[k]
         classGraph[k] = (Nkc + REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)
     return classGraph
+
+
 
 
 def initializeClasses(keypoints):
@@ -143,11 +146,11 @@ def trainingFerns(imageName):
         ferns = generateFerns(features[i])
         pro = traningClass(ferns)
         features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
-   
+
     return features
         
     
             
 
-trainingFerns("3.pgm")
+# print(len(trainingFerns("3.pgm")))
 
