@@ -128,7 +128,7 @@ def applyAffineDeformation(img):
             affineMatrix = generateAffineDeformationMatrixSIFTForm()
             
     
-            np.linalg.inv(affineMatrix)
+            np.linalg.inv(affineMatrix) # invertable check
     
                 
             newWidth, newHeight = getNewImageShape(affineMatrix, width, height)

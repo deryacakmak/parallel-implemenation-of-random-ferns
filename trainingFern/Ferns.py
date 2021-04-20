@@ -2,7 +2,6 @@ import math
 import trainingFerns as tf
 
 
-
 FERN_NUMBER = 11
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
@@ -12,9 +11,7 @@ REGULARIZATION_TERM = 1
 def calculateProbablity(fern, trainingClasses, classNum):
     decimalNum = tf.convertDecimal(fern)
     trainingClass = trainingClasses[classNum]
-
     if decimalNum in trainingClass:
-
         return trainingClasses[classNum][decimalNum]
     else:
         return trainingClasses[classNum][-1]
@@ -40,9 +37,10 @@ def classifyKeypoint(imageName, originalImage):
             
         probabilities.sort(key=lambda x:x[1])
         matchResult.append([keypoint,probabilities[0]])
-        print(matchResult)
         break
 
-classifyKeypoint("3.pgm","3.pgm")
+#classifyKeypoint("3.pgm","3.pgm")
 
 # print(math.ceil(-1.0))
+
+

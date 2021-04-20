@@ -35,9 +35,6 @@ def detectKeypoint(image):
     gray = np.float32(gray)
     dst = cv2.cornerHarris(gray,2,3,0.04)
     
-    #result is dilated for marking the corners, not important
-    dst = cv2.dilate(dst,None)
-    
     return np.argwhere(dst > 0.01 * dst.max())
 
 def findCoordinate(x, y, A):
@@ -80,7 +77,7 @@ def extractFeature(patch, numberOfFeatureEvaluatedPerPatch = NUMBER_OF_FEATURE_E
         I1 = random.randint(0, end)
         I2 = random.randint(0, end)
         if abs(I1-I2) >3:
-            features.append(checkIntensityOfPixel(I1, I2))
+            features.append(checkIntensityOfPixel(patch[I1], patch[I2]))
     return features
 
 
@@ -114,8 +111,6 @@ def probablityDistrubition(classGraph, K):
     return classGraph
 
 
-
-
 def initializeClasses(keypoints):
     features = dict()
     for i in range(len(keypoints)):
@@ -129,6 +124,7 @@ def trainingFerns(imageName):
     image = applySmoothing(addNoise(image))
     keypoints = detectKeypoint(image)
     features = initializeClasses(keypoints)
+
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
         warp_dst, matrixM = applyAffineDeformation(image)
         warp_dst = cv2.cvtColor(warp_dst,cv2.COLOR_BGR2GRAY)
@@ -151,6 +147,5 @@ def trainingFerns(imageName):
         
     
             
-
-# print(len(trainingFerns("3.pgm")))
+# print(trainingFerns("3.pgm"))
 
