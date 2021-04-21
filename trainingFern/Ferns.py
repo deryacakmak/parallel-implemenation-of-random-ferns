@@ -8,19 +8,25 @@ NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
 REGULARIZATION_TERM = 1
 
 
-def calculateProbablity(fern, trainingClasses, classNum):
+def calculateProbablity(fern, trainingClass, classNum):
     decimalNum = tf.convertDecimal(fern)
-    trainingClass = trainingClasses[classNum]
     if decimalNum in trainingClass:
-        return trainingClasses[classNum][decimalNum]
+        return trainingClass[decimalNum]
     else:
-        return trainingClasses[classNum][-1]
-        
+        return trainingClass[-1]
+
+
+def checkFern(trainingClasses, fern, classNum):
+    trainingClass = trainingClasses[classNum]
+    if len(trainingClass) != 0:
+        return trainingClass
+    else:
+        return 0
 
 def classifyKeypoint(imageName, originalImage):
     img = tf.readImage(imageName)
     keypoints = tf.detectKeypoint(img)
-    trainingClasses = tf.trainingFerns(originalImage)
+    trainingClasses, tainingKeypoints= tf.trainingFerns(originalImage)
     totalClassNum = len(trainingClasses)
     matchResult = []
     for keypoint in keypoints:
@@ -32,16 +38,17 @@ def classifyKeypoint(imageName, originalImage):
         for i in range(0,totalClassNum):
             probability = 0
             for fern in ferns:
-                probability += math.log(calculateProbablity(fern, trainingClasses, i))
+                trainingClass = checkFern(trainingClasses, fern, i) 
+                if(trainingClass != 0):
+                    probability += math.log(calculateProbablity(fern, trainingClass, i))
             probabilities.append((probability,i))
             
         probabilities.sort(key=lambda x:x[1])
         matchResult.append([keypoint,probabilities[0]])
-        break
-    return matchResult
+    return matchResult, tainingKeypoints
         
 
-print(classifyKeypoint("3.pgm","3.pgm"))
+#print(classifyKeypoint("3.pgm","3.pgm"))
 
 # print(math.ceil(-1.0))
 

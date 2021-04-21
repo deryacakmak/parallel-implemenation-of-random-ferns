@@ -10,7 +10,7 @@ PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
 FERN_NUMBER = 11
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 2
+NUM_OF_IMAGES_TO_GENERATES = 1000
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -117,7 +117,8 @@ def initializeClasses(keypoints):
         features[i] = []
     return features
         
-        
+
+ 
 def trainingFerns(imageName):
     
     image = readImage(imageName)
@@ -144,7 +145,7 @@ def trainingFerns(imageName):
             pro = traningClass(ferns)
             features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
         
-    return features
+    return features, keypoints
         
 
 # trainingFerns("eiffel_tower.png")      
