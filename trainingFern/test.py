@@ -10,6 +10,13 @@ def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
 
 
 
+def drawLine(keypointListOriginal, keypointListMatch, width, img_tmp):
+    for i in range(len(keypointListMatch)):
+        x1, y1 = keypointListMatch[i][0]+width, keypointListMatch[i][1]
+        x2, y2 = keypointListOriginal[i][0], keypointListOriginal[i][1]
+        cv2.line(img_tmp, (x1, y1), (x2, y2), (0, 255, 0), thickness=2)
+    cv2.imwrite("result.png",img_tmp)
+    
 img = cv2.imread("eiffel_tower.png")
 gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 rotated = ndimage.rotate(gray, 4)

@@ -104,7 +104,7 @@ def traningClass(ferns):
 
 def probablityDistrubition(classGraph, K):
     N = sum(classGraph.values())
-    classGraph[-1] = (REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)
+    classGraph[-1] = (REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM) 
     for k in classGraph:
         Nkc = classGraph[k]
         classGraph[k] = (Nkc + REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)
@@ -121,7 +121,7 @@ def initializeClasses(keypoints):
 def trainingFerns(imageName):
     
     image = readImage(imageName)
-    image = applySmoothing(addNoise(image))
+    #image = applySmoothing(addNoise(image))
     keypoints = detectKeypoint(image)
     features = initializeClasses(keypoints)
 
@@ -139,13 +139,14 @@ def trainingFerns(imageName):
             classNum +=1
 
     for i in range(len(keypoints)):
-        ferns = generateFerns(features[i])
-        pro = traningClass(ferns)
-        features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
-
+        if len(features[i]) != 0:
+            ferns = generateFerns(features[i])
+            pro = traningClass(ferns)
+            features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
+        
     return features
         
-    
-            
-# print(trainingFerns("3.pgm"))
+
+# trainingFerns("eiffel_tower.png")      
+#print(trainingFerns("eiffel_tower.png"))
 

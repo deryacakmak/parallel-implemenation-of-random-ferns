@@ -38,8 +38,10 @@ def classifyKeypoint(imageName, originalImage):
         probabilities.sort(key=lambda x:x[1])
         matchResult.append([keypoint,probabilities[0]])
         break
+    return matchResult
+        
 
-#classifyKeypoint("3.pgm","3.pgm")
+print(classifyKeypoint("3.pgm","3.pgm"))
 
 # print(math.ceil(-1.0))
 
