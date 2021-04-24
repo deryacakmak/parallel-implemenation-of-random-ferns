@@ -8,9 +8,13 @@ from affineDeformation import applyAffineDeformation
 allClasses = dict()
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
-FERN_NUMBER = 11
+FERN_NUMBER = 30
 REGULARIZATION_TERM = 1
+<<<<<<< Updated upstream
 NUM_OF_IMAGES_TO_GENERATES = 2
+=======
+NUM_OF_IMAGES_TO_GENERATES = 100
+>>>>>>> Stashed changes
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -29,6 +33,7 @@ def applySmoothing(image):
     return cv2.GaussianBlur(image,(7,7),0)
 
 def detectKeypoint(image):
+<<<<<<< Updated upstream
     
     gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     
@@ -38,21 +43,12 @@ def detectKeypoint(image):
     #result is dilated for marking the corners, not important
     dst = cv2.dilate(dst,None)
     
+=======
+    image = np.float32(image)
+    dst = cv2.cornerHarris(image,2,3,0.04)
+>>>>>>> Stashed changes
     return np.argwhere(dst > 0.01 * dst.max())
 
-def findCoordinate(x, y, A):
-    
-     M11 = A[0]
-     M12 = A[1]
-     M13 = A[2]
-     M21 = A[3]
-     M22 = A[4]
-     M23 = A[5]
-     
-     xp = M11*x + M12*y + M13;
-     yp = M21*x + M22*y + M23;
-     
-     return int(xp), int(yp)
  
 def findPixelIndex(width, x, y):
     return width*y+x
@@ -69,9 +65,9 @@ def findPatch(pixelIndex, image):
 
 def checkIntensityOfPixel(I1, I2):
     if I1 > I2:
-        return 0
-    else:
         return 1
+    else:
+        return 0
 
 def extractFeature(patch):
     features = []
@@ -123,12 +119,16 @@ def initializeClasses(keypoints):
 def trainingFerns(imageName):
     
     image = readImage(imageName)
+<<<<<<< Updated upstream
     image = applySmoothing(addNoise(image))
+=======
+    image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    #image = applySmoothing(addNoise(image))
+>>>>>>> Stashed changes
     keypoints = detectKeypoint(image)
     features = initializeClasses(keypoints)
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
-        warp_dst, matrixM = applyAffineDeformation(image)
-        warp_dst = cv2.cvtColor(warp_dst,cv2.COLOR_BGR2GRAY)
+        warp_dst, newKeypoints = applyAffineDeformation(image, keypoints.tolist())
         height, width = warp_dst.shape[:2]
         classNum = 0
         for keypoint in keypoints:
@@ -140,6 +140,7 @@ def trainingFerns(imageName):
             classNum +=1
 
     for i in range(len(keypoints)):
+<<<<<<< Updated upstream
         ferns = generateFerns(features[i])
         pro = traningClass(ferns)
         features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
@@ -150,4 +151,33 @@ def trainingFerns(imageName):
             
 
 trainingFerns("3.pgm")
+=======
+        if len(features[i]) != 0:
+            ferns = generateFerns(features[i])
+            #print(ferns)
+            
+            pro = traningClass(ferns)
+            features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
+    return features, keypoints
+
+
+
+
+image = readImage("eiffel_tower.png")
+image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+index = findPixelIndex(image.shape[:2][1], 5,2)
+print(image[5][2],image.flatten()[])
+# keypoints = detectKeypoint(image)
+# image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+# warp_dst, newKeypoints = applyAffineDeformation(image, keypoints.tolist())
+# for i in newKeypoints:
+#     warp_dst[i[1][0]][i[1][1]] = 255
+
+# cv2.imwrite("findCoordinate.png",warp_dst)
+
+
+
+
+
+>>>>>>> Stashed changes
 
