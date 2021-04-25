@@ -7,10 +7,11 @@ from affineDeformation import applyAffineDeformation
 
 
 PATCH_WIDTH = 32
-NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
-FERN_NUMBER = 11
+NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 12
+FERN_NUMBER = 2
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 1000
+NUM_OF_IMAGES_TO_GENERATES = 1
+FERN_SIZE = 2
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -29,32 +30,11 @@ def applySmoothing(image):
     return cv2.GaussianBlur(image,(7,7),0)
 
 def detectKeypoint(image):
-    
-    gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-    
-    gray = np.float32(gray)
-    dst = cv2.cornerHarris(gray,2,3,0.04)
-    
+    image = np.float32(image)
+    dst = cv2.cornerHarris(image,2,3,0.04)
     return np.argwhere(dst > 0.01 * dst.max())
 
-def findCoordinate(x, y, A):
-    
-     M11 = A[0]
-     M12 = A[1]
-     M13 = A[2]
-     M21 = A[3]
-     M22 = A[4]
-     M23 = A[5]
-     
-     xp = M11*x + M12*y + M13;
-     yp = M21*x + M22*y + M23;
-     
-     return int(xp), int(yp)
- 
-def findPixelIndex(width, x, y):
-    return width*y+x
-    
-    
+
 def findPatch(pixelIndex, image, patchWidth = PATCH_WIDTH):
     start = int(pixelIndex- (patchWidth/2))
     end = int(pixelIndex + (patchWidth/2))
@@ -66,9 +46,9 @@ def findPatch(pixelIndex, image, patchWidth = PATCH_WIDTH):
 
 def checkIntensityOfPixel(I1, I2):
     if I1 > I2:
-        return 0
-    else:
         return 1
+    else:
+        return 0
 
 def extractFeature(patch, numberOfFeatureEvaluatedPerPatch = NUMBER_OF_FEATURE_EVALUATED_PER_PATCH):
     features = []
@@ -82,19 +62,16 @@ def extractFeature(patch, numberOfFeatureEvaluatedPerPatch = NUMBER_OF_FEATURE_E
 
 
 # tüm resimlerden gelen keypointe ait featureları fernlere böl
-def generateFerns(features, fernNumber = FERN_NUMBER):
-    S = math.ceil(len(features)/fernNumber)
-    random.shuffle(features)
-    return [features[x:x+S] for x in range(0, len(features), S)]
+def generateFerns(features):
+    random.shuffle(features)        
+    return [features[x:x+FERN_SIZE] for x in range(0, len(features), FERN_SIZE)]
 
-def convertDecimal(fern):
-    return int("".join(str(x) for x in fern), 2)
 
 # [[0,1,0], [0,1,0], [0,1,0]]
 def traningClass(ferns):
     classGraph = dict()
     for fern in ferns:
-        num = convertDecimal(fern)
+        num = int("".join(str(x) for x in fern), 2)
         if num in classGraph:
             classGraph[num] = classGraph[num] + 1
         else:
@@ -102,8 +79,7 @@ def traningClass(ferns):
     return classGraph
 
 
-def probablityDistrubition(classGraph, K):
-    N = sum(classGraph.values())
+def probablityDistrubition(N,classGraph, K):
     classGraph[-1] = (REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM) 
     for k in classGraph:
         Nkc = classGraph[k]
@@ -113,8 +89,9 @@ def probablityDistrubition(classGraph, K):
 
 def initializeClasses(keypoints):
     features = dict()
-    for i in range(len(keypoints)):
-        features[i] = []
+    for i in keypoints:
+        key = (i[0],i[1])
+        features[key] = []
     return features
         
 
@@ -122,32 +99,36 @@ def initializeClasses(keypoints):
 def trainingFerns(imageName):
     
     image = readImage(imageName)
-    #image = applySmoothing(addNoise(image))
+    image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+    # image = applySmoothing(addNoise(image))
     keypoints = detectKeypoint(image)
     features = initializeClasses(keypoints)
 
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
-        warp_dst, matrixM = applyAffineDeformation(image)
-        warp_dst = cv2.cvtColor(warp_dst,cv2.COLOR_BGR2GRAY)
-        height, width = warp_dst.shape[:2]
-        classNum = 0
-        for keypoint in keypoints:
-            x, y = findCoordinate(keypoint[0], keypoint[1], matrixM.flatten())
-            if(x<width and y<height):
-                index = findPixelIndex(width, x, y)
-                patch = findPatch(index, warp_dst.flatten())
-                features[classNum] = features[classNum] + extractFeature(patch)
-            classNum +=1
+        warp_dst, newKeypoints = applyAffineDeformation(image, keypoints.tolist())
+        for i in newKeypoints:
+            image[i[0][0]][i[0][1]] = 255
 
-    for i in range(len(keypoints)):
-        if len(features[i]) != 0:
-            ferns = generateFerns(features[i])
+
+        for keypoint in newKeypoints:
+            classNum = keypoint[0]
+            y, x = keypoint[1]
+            index = warp_dst.shape[:2][1]*y+x
+            patch = findPatch(index, warp_dst.flatten())
+            features[classNum] = features[classNum] + extractFeature(patch)
+
+
+    for i in keypoints:
+        key = (i[0],i[1])
+        if len(features[key]) != 0:
+            ferns = generateFerns(features[key])
             pro = traningClass(ferns)
-            features[i] = probablityDistrubition(pro,pow(2,len(ferns[0])))
-        
+            features[key] = probablityDistrubition(len(ferns),pro,pow(2,len(ferns[0])))
     return features, keypoints
-        
 
-# trainingFerns("eiffel_tower.png")      
-#print(trainingFerns("eiffel_tower.png"))
+
+# trainingFerns("eiffel_tower.png")
+
+
+
 
