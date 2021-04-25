@@ -106,8 +106,6 @@ def trainingFerns(imageName):
 
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
         warp_dst, newKeypoints = applyAffineDeformation(image, keypoints.tolist())
-        for i in newKeypoints:
-            image[i[0][0]][i[0][1]] = 255
 
 
         for keypoint in newKeypoints:
