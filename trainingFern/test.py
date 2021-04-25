@@ -1,6 +1,6 @@
 import cv2
 from scipy import ndimage
-import Ferns as ferns
+from  Ferns import classifyKeypoint
 
 def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
     h_min = min(im.shape[0] for im in im_list)
@@ -19,30 +19,6 @@ def drawLine(keypointListOriginal, keypointListMatch, width, img_tmp):
 
     cv2.imwrite("result.png",img_tmp)
     
-img = cv2.imread("eiffel_tower.png")
-height, width = img.shape[:2]
-gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-img2 = cv2.imread("eiffel.png")
-img2 = cv2.cvtColor(img2,cv2.COLOR_BGR2GRAY)
 
-v_img = hconcat_resize_min([gray,img2])
+matchResult = classifyKeypoint("rotatedImage.png","eiffel_tower.png")
 
-matchResult, trainingKeypoints = ferns.classifyKeypoint("eiffel.png", "eiffel_tower.png")
-#print(matchResult[0][0])
-# keypointListMatch = []
-# for i in trainingKeypoints:
-#     print(i)
-    
-drawLine(trainingKeypoints, matchResult, width, v_img)
-
-
-
-# img = cv2.imread("eiffel.png")
-# cv2.line(img, (width, height),(width,5),  (0, 255, 0), thickness=1)
-# cv2.imwrite("result.png",img)
-
-
-
-# rotated = ndimage.rotate(gray, 4)
-
-# cv2.imwrite("eiffel.png",rotated)

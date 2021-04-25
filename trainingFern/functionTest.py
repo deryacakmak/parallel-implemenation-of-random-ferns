@@ -35,5 +35,15 @@ for i in newKeypoints:
 
 """
 
+"""
 
+###### Concanate Image  ######
+
+img = cv2.imread("eiffel_tower.png")
+img2 = cv2.imread("rotatedImage.png")
+im3 = hconcat_resize_min([img,img2])
+
+cv2.imwrite("concatanate.png",im3)
+
+"""
 

@@ -1,7 +1,6 @@
 import cv2
 import random
 import numpy as np
-import math
 from skimage.util import random_noise
 from affineDeformation import applyAffineDeformation
 
