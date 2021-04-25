@@ -12,7 +12,7 @@ def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
 
 def drawLine(keypointListOriginal, keypointListMatch, width, img_tmp):
     for i in range(len(keypointListMatch)):
-        x1, y1 = keypointListMatch[i][0][0]+width, keypointListMatch[i][0][1]
+        x1, y1 = keypointListMatch[i][0][0], keypointListMatch[i][0][1]+width
         classNum = keypointListMatch[1][1][1]
         x2, y2 = keypointListOriginal[classNum][0], keypointListOriginal[classNum][1]
         cv2.line(img_tmp, (x2, y2), (x1, y1), (0, 255, 0), thickness=2)
@@ -30,8 +30,9 @@ v_img = hconcat_resize_min([gray,img2])
 matchResult, trainingKeypoints = ferns.classifyKeypoint("eiffel.png", "eiffel_tower.png")
 #print(matchResult[0][0])
 # keypointListMatch = []
-# for i in matchResult:
-#     keypointListMatch.append(i[0])
+# for i in trainingKeypoints:
+#     print(i)
+    
 drawLine(trainingKeypoints, matchResult, width, v_img)
 
 

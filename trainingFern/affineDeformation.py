@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-
+from warpAffine import warpAffine
 
 # [x', y'] = A[x, y] + T
 
@@ -115,22 +115,17 @@ def getNewImageShape(affineMatrix, width, height):
 
 
     
-def applyAffineDeformation(img):
+def applyAffineDeformation(img, keypointList):
     
-    
-    height, width = img.shape[:2]
-    
-
     while True:
-
-        try:
-            
+         try:
+            height, width = img.shape[:2]
+    
             affineMatrix = generateAffineDeformationMatrixSIFTForm()
             
-    
+
             np.linalg.inv(affineMatrix) # invertable check
     
-                
             newWidth, newHeight = getNewImageShape(affineMatrix, width, height)
     
             c1 = [width/2, height/2] # center of original image
@@ -140,19 +135,23 @@ def applyAffineDeformation(img):
     
             matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
             
-    
-            warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
-        
+            outputImage = np.zeros((newHeight, newWidth )).astype(np.uint8)
             
-            return warp_dst, matrixM
+    
+            #warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+            warp_dst, keypoints = warpAffine(matrixM.flatten(), img, newWidth, newHeight, width, height, outputImage, keypointList)
+            
+            
+            return warp_dst, keypoints
+         except:
+             continue
 
-        except:
-
-            continue
 
 # img = readImage("eiffel_tower.png")
+# gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+# img, M = applyAffineDeformation(gray)
 
-# img, M, T = applyAffineDeformation(img)
+# cv2.imwrite("applyAffineDeformation.png",img)
 # print(M)
 # print(M.flatten())
 
@@ -162,8 +161,3 @@ def applyAffineDeformation(img):
 #     args = parser.parse_args()
 #     main(args.file)
         
-
-
-
-
-
