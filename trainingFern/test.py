@@ -1,5 +1,4 @@
 import cv2
-from scipy import ndimage
 from  Ferns import classifyKeypoint
 
 def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):

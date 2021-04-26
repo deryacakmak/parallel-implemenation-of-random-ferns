@@ -3,10 +3,10 @@ import cv2
 import trainingFerns as tf
 
 
-FERN_NUMBER = 11
+
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 12
-REGULARIZATION_TERM = 1
+
 
 
 def calculateProbablity(fern, trainingClass):
@@ -18,7 +18,7 @@ def calculateProbablity(fern, trainingClass):
 
 
 def classifyKeypoint(imageName, originalImage):
-    
+    print("Maching started!")
     img = tf.readImage(imageName)
     img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     keypoints = tf.detectKeypoint(img)
@@ -28,8 +28,9 @@ def classifyKeypoint(imageName, originalImage):
     
     
     for keypoint in keypoints:
+        
         probabilities = []
-        index = img.shape[:2][1]*keypoint[1]+keypoint[0]
+        index = img.shape[:2][1]*keypoint[0]+keypoint[1]
         patch = tf.findPatch(index, img.flatten(), PATCH_WIDTH)
         features = tf.extractFeature(patch,NUMBER_OF_FEATURE_EVALUATED_PER_PATCH )
         ferns = tf.generateFerns(features)
@@ -41,12 +42,13 @@ def classifyKeypoint(imageName, originalImage):
             for fern in ferns:
                 trainingClass = trainingClasses[classNum]
                 if(len(trainingClass) !=0):
-                    probability += math.log(calculateProbablity(fern, trainingClass))
+                    probability = probability + math.log(calculateProbablity(fern, trainingClass))
                   
             probabilities.append((probability,classNum))
                       
         probabilities.sort(key=lambda x:x[1])
         matchResult.append([keypoint,probabilities[0]])
+    print("Matching done!")
     return matchResult
         
 

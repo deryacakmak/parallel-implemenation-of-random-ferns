@@ -7,10 +7,9 @@ from affineDeformation import applyAffineDeformation
 
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 12
-FERN_NUMBER = 2
 REGULARIZATION_TERM = 1
 NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 2
+FERN_SIZE = 30
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -96,7 +95,7 @@ def initializeClasses(keypoints):
 
  
 def trainingFerns(imageName):
-    
+    print("Training started!")
     image = readImage(imageName)
     image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     # image = applySmoothing(addNoise(image))
@@ -106,8 +105,9 @@ def trainingFerns(imageName):
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
         warp_dst, newKeypoints = applyAffineDeformation(image, keypoints.tolist())
 
-
+        print("deformed image!",i)
         for keypoint in newKeypoints:
+
             classNum = keypoint[0]
             y, x = keypoint[1]
             index = warp_dst.shape[:2][1]*y+x
@@ -121,6 +121,7 @@ def trainingFerns(imageName):
             ferns = generateFerns(features[key])
             pro = traningClass(ferns)
             features[key] = probablityDistrubition(len(ferns),pro,pow(2,len(ferns[0])))
+    print("Training done!")
     return features, keypoints
 
 
