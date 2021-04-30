@@ -1,9 +1,6 @@
 
-def warpAffine(A, inputImage,  newWidth,  newHeight , oldWidth,  oldHeight, outputImage, keypointList):
+def warpAffine(A, inputImage,  newWidth,  newHeight , oldWidth,  oldHeight, outputImage):
     
-    keypoints = []
-    
- 
     for Row in range(newHeight):
        
         for Col in range(newWidth):
@@ -27,10 +24,7 @@ def warpAffine(A, inputImage,  newWidth,  newHeight , oldWidth,  oldHeight, outp
              
              xi = int(xp)
              yi = int(yp)
-             
-             if check([yi,xi], keypointList):
-                 keypointList.remove([yi,xi])
-                 keypoints.append([(yi,xi),(Row,Col)]) # originalKeypoint, newKeypoint
+
              
              if (xi >= 0 and yi >= 0 and xi < oldWidth-1 and yi < oldHeight-1):
                  
@@ -54,12 +48,8 @@ def warpAffine(A, inputImage,  newWidth,  newHeight , oldWidth,  oldHeight, outp
             
              outputImage[Row][Col] = value
              
-    return outputImage, keypoints
+    return outputImage
 
 
-def check(coordinants, keypointList):
-    for keypoint in keypointList:
-        if(coordinants[0] == keypoint[0] and coordinants[1] == keypoint[1]  ):
-            return True
-    return False
+
 

@@ -115,7 +115,7 @@ def getNewImageShape(affineMatrix, width, height):
 
 
     
-def applyAffineDeformation(img, keypointList):
+def applyAffineDeformation(img):
     
     while True:
          try:
@@ -135,14 +135,11 @@ def applyAffineDeformation(img, keypointList):
     
             matrixM = calculateMatrixM(affineMatrix, matrixT).astype(np.float32)
             
-            outputImage = np.zeros((newHeight, newWidth )).astype(np.uint8)
-            
-    
-            #warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
-            warp_dst, keypoints = warpAffine(matrixM.flatten(), img, newWidth, newHeight, width, height, outputImage, keypointList)
+            warp_dst = cv2.warpAffine(img, matrixM, (newWidth, newHeight))
+            #warp_dst = warpAffine(matrixM.flatten(), img, newWidth, newHeight, width, height, outputImage)
             
             
-            return warp_dst, keypoints
+            return warp_dst, matrixM
          except:
              continue
 
