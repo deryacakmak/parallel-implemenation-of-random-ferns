@@ -5,7 +5,7 @@ import trainingFerns as tf
 
 
 PATCH_WIDTH = 32
-NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 12
+NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 10
 
 
 
@@ -36,20 +36,19 @@ def classifyKeypoint(imageName, originalImage):
         ferns = tf.generateFerns(features)
         
         
-        for i in originalImageKeypoints:
-            classNum = (i[0], i[1])
+        for i in range(len(originalImageKeypoints)):
             probability = 0
             for fern in ferns:
-                trainingClass = trainingClasses[classNum]
+                trainingClass = trainingClasses[i]
                 if(len(trainingClass) !=0):
                     probability = probability + math.log(calculateProbablity(fern, trainingClass))
                   
-            probabilities.append((probability,classNum))
+            probabilities.append((probability,i))
                       
         probabilities.sort(key=lambda x:x[1])
         matchResult.append([keypoint,probabilities[0]])
     print("Matching done!")
-    return matchResult
+    return matchResult, keypoints
         
 
 # classifyKeypoint("eiffel_tower.png","eiffel_tower.png")

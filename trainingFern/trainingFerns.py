@@ -6,10 +6,10 @@ from affineDeformation import applyAffineDeformation
 
 
 PATCH_WIDTH = 32
-NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 12
+NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 10
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 2
+NUM_OF_IMAGES_TO_GENERATES = 600
+FERN_SIZE = 30
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -87,16 +87,13 @@ def probablityDistrubition(N,classGraph, K):
 
 def initializeClasses(keypoints):
     features = dict()
-    for i in keypoints:
-        key = (i[0],i[1])
-        features[key] = []
+    for i in range(len(keypoints)):
+        features[i] = []
     return features
 
 
 def findCoordinate(A, keypoints):
-    
     newKeypoints = []
-    
     a00 = A[0]
     a01 = A[1]
     a10 = A[3]
@@ -127,34 +124,46 @@ def trainingFerns(imageName):
     features = initializeClasses(keypoints)
 
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
-       
+        
+        print("generate image",i)
+        
         warp_dst, matrixM = applyAffineDeformation(image)
         
         newKeypoints = findCoordinate(matrixM.flatten(), keypoints)
+
+
+        print("deformed image!",i)
         
+        classNum = 0
+        for keypoint in newKeypoints:
 
-    #     print("deformed image!",i)
-    #     for keypoint in newKeypoints:
-
-    #         classNum = keypoint[0]
-    #         y, x = keypoint[1]
-    #         index = warp_dst.shape[:2][1]*y+x
-    #         patch = findPatch(index, warp_dst.flatten())
-    #         features[classNum] = features[classNum] + extractFeature(patch) # [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1]
+            y, x = keypoint[1], keypoint[0]
+            index = warp_dst.shape[:2][1]*y+x
+            patch = findPatch(index, warp_dst.flatten())
+            features[classNum] = features[classNum] + extractFeature(patch) # [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1]
+            
+            classNum +=1
             
 
-    # for i in keypoints:
-    #     key = (i[0],i[1])
-    #     if len(features[key]) != 0:
-    #         ferns = generateFerns(features[key]) # [[1, 1], [0, 1], [0, 0], [1, 0], [0, 0], [0, 1]]
+    for i in range(len(keypoints)):
 
-    #         pro = traningClass(ferns) # {2: 3, 3: 2, 1: 1}
-    #         features[key] = probablityDistrubition(len(ferns),pro,pow(2,len(ferns[0]))) # (60, 142): {0: 0.2, 1: 0.2, 2: 0.5, -1: 0.11000000000000001}
-    # print("Training done!")
-    # return features, keypoints
+        if len(features[i]) != 0:
+            ferns = generateFerns(features[i]) # [[1, 1], [0, 1], [0, 0], [1, 0], [0, 0], [0, 1]]
+
+            pro = traningClass(ferns) # {2: 3, 3: 2, 1: 1}
+            features[i] = probablityDistrubition(len(ferns),pro,pow(2,len(ferns[0]))) # (60, 142): {0: 0.2, 1: 0.2, 2: 0.5, -1: 0.11000000000000001}
+    print("Training done!")
+    return features, keypoints
 
 
-trainingFerns("eiffel_tower.png")
+
+        
+        # for keypoint in newKeypoints:
+        #     warp_dst[keypoint[1]][keypoint[0]] = 255
+            
+        # cv2.imwrite("affineTest45.png",warp_dst)
+
+#trainingFerns("eiffel_tower.png")
 
 
 

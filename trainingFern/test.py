@@ -9,16 +9,16 @@ def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
 
 
 
-def drawLine(matchResult, width, img_tmp):
+def drawLine(matchResult, width, img_tmp, originalKeypoints):
     
     for i in matchResult:
-        x1,y1 = i[1][1]
+        x1,y1 = originalKeypoints[i[1][1]]
         x2,y2 = i[0][0], i[0][1] + width
         cv2.line(img_tmp, (y2, x2), (y1, x1), (0, 255, 0), thickness=2)
     cv2.imwrite("result.png",img_tmp)
     
 
-matchResult = classifyKeypoint("rotatedImage.png","eiffel_tower.png")
+matchResult, keypoints = classifyKeypoint("rotatedImage.png","eiffel_tower.png")
 
 img = cv2.imread("concatanate.png")
 img2 = cv2.imread("eiffel_tower.png")
@@ -29,4 +29,4 @@ img2 = cv2.imread("eiffel_tower.png")
 
 # cv2.imwrite("result.png",img)
 
-drawLine(matchResult, img2.shape[:2][1], img)
+drawLine(matchResult, img2.shape[:2][1], img, keypoints)
