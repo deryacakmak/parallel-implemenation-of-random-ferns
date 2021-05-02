@@ -5,52 +5,57 @@ import trainingFerns as tf
 
 
 PATCH_WIDTH = 32
-NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 10
+NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
+FERN_NUMBER = 30
 
-
-
-def calculateProbablity(fern, trainingClass):
-    decimalNum = int("".join(str(x) for x in fern), 2)
-    if decimalNum in trainingClass:
-        return trainingClass[decimalNum]
-    else:
-        return trainingClass[-1]
-
+    
 
 def classifyKeypoint(imageName, originalImage):
+    
+    
     print("Maching started!")
     img = tf.readImage(imageName)
     img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    
+    
     keypoints = tf.detectKeypoint(img)
+    
     trainingClasses, originalImageKeypoints = tf.trainingFerns(originalImage)
 
-    matchResult = []
-    
+    match = []
     
     for keypoint in keypoints:
         
-        probabilities = []
-        index = img.shape[:2][1]*keypoint[0]+keypoint[1]
-        patch = tf.findPatch(index, img.flatten(), PATCH_WIDTH)
-        features = tf.extractFeature(patch,NUMBER_OF_FEATURE_EVALUATED_PER_PATCH )
-        ferns = tf.generateFerns(features)
+        results = [0] * len(originalImageKeypoints)
+        
+        patch = tf.findPatch(keypoint[0],keypoint[1], img)
+ 
         
         
-        for i in range(len(originalImageKeypoints)):
-            probability = 0
-            for fern in ferns:
-                trainingClass = trainingClasses[i]
-                if(len(trainingClass) !=0):
-                    probability = probability + math.log(calculateProbablity(fern, trainingClass))
-                  
-            probabilities.append((probability,i))
-                      
-        probabilities.sort(key=lambda x:x[1])
-        matchResult.append([keypoint,probabilities[0]])
-    print("Matching done!")
-    return matchResult, keypoints
-        
+        for i in range(FERN_NUMBER):
+            
+            fern = tf.extractFeature(patch.flatten())
 
+            decimalNum =  int("".join(str(x) for x in fern), 2) 
+            
+            for classNum in range(len(originalImageKeypoints)):
+                
+                classCount = trainingClasses[classNum]
+                
+                if(decimalNum in classCount):
+                      results[classNum] = math.log(classCount[decimalNum]) + results[classNum] 
+                     
+                else:
+                    results[classNum] = math.log(classCount[-1]) + results[classNum] 
+                    
+        max_value = max(results)
+        max_index = results.index(max_value)
+        
+        match.append((keypoint,originalImageKeypoints[max_index]))
+        
+        
+    return match
+        
 # classifyKeypoint("eiffel_tower.png","eiffel_tower.png")
 
 

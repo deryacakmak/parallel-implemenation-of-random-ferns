@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-from warpAffine import warpAffine
+
 
 # [x', y'] = A[x, y] + T
 
@@ -117,9 +117,11 @@ def getNewImageShape(affineMatrix, width, height):
     
 def applyAffineDeformation(img):
     
+    height, width = img.shape[:2]
+    
     while True:
          try:
-            height, width = img.shape[:2]
+
     
             affineMatrix = generateAffineDeformationMatrixSIFTForm()
             
