@@ -1,6 +1,6 @@
 import cv2
 from  Ferns import classifyKeypoint
-from trainingFerns import detectKeypoint 
+# from trainingFerns import detectKeypoint 
 
 def hconcat_resize_min(im_list, interpolation=cv2.INTER_CUBIC):
     h_min = min(im.shape[0] for im in im_list)
@@ -15,7 +15,7 @@ def drawLine(matchResult, width, img_tmp):
     for i in matchResult:
         x1,y1 = i[1]
         x2,y2 = i[0][0], i[0][1] + width
-        cv2.line(img_tmp, (y2, x2), (y1, x1), (0, 255, 0), thickness=2)
+        cv2.line(img_tmp, (y2, x2), (y1, x1), (0, 255, 0), thickness=1)
     cv2.imwrite("result.png",img_tmp)
     
 

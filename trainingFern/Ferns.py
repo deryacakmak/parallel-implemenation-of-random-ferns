@@ -6,7 +6,7 @@ import trainingFerns as tf
 
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
-FERN_NUMBER = 30
+FERN_NUMBER = 40
 
     
 
@@ -29,7 +29,6 @@ def classifyKeypoint(imageName, originalImage):
         results = [0] * len(originalImageKeypoints)
         
         patch = tf.findPatch(keypoint[0],keypoint[1], img)
- 
         
         
         for i in range(FERN_NUMBER):

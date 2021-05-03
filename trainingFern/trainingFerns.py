@@ -5,11 +5,13 @@ from skimage.util import random_noise
 from affineDeformation import applyAffineDeformation
 
 
+
 PATCH_WIDTH = 32
 NUMBER_OF_FEATURE_EVALUATED_PER_PATCH = 11
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 10000
+NUM_OF_IMAGES_TO_GENERATES = 1
 FERN_SIZE = 11
+FERN_NUM = 40
 K = pow(2,FERN_SIZE)
 
 def readImage(imageName):
@@ -120,15 +122,14 @@ def findCoordinate(A, keypoints):
     
 def calculateCount(x, y, img, classNum, allProbablities):
     
-    # patch = findPatch(x,y, img)
-     
-    fern = extractFeature(findPatch(x,y, img).flatten())
-    decimalNum =  int("".join(str(x) for x in fern), 2)
-    classCount = allProbablities[classNum]
-    if(decimalNum in classCount ):
-        classCount[decimalNum] =  classCount[decimalNum] + 1
-    else:
-        classCount[decimalNum] = 1
+    for i in range(FERN_NUM):
+        fern = extractFeature(findPatch(x,y, img).flatten())
+        decimalNum =  int("".join(str(x) for x in fern), 2)
+        classCount = allProbablities[classNum]
+        if(decimalNum in classCount ):
+            classCount[decimalNum] =  classCount[decimalNum] + 1
+        else:
+            classCount[decimalNum] = 1
 
     
  
@@ -150,6 +151,7 @@ def trainingFerns(imageName):
         
         newKeypoints = findCoordinate(matrixM.flatten(), keypoints)
         
+        
         del matrixM
 
         print("deformed image!",i)
@@ -158,8 +160,7 @@ def trainingFerns(imageName):
         for keypoint in newKeypoints:
             
             calculateCount(keypoint[1],  keypoint[0], warp_dst, classNum, allProbablities)
-            
-            
+
             classNum +=1
             
     for i in range(len(allProbablities)):
@@ -171,6 +172,8 @@ def trainingFerns(imageName):
     return allProbablities, keypoints
 
 
+# trainingFerns("eiffel_tower.png")
+
 
         
         # for keypoint in newKeypoints:
@@ -178,11 +181,16 @@ def trainingFerns(imageName):
             
         # cv2.imwrite("affineTest45.png",warp_dst)
 
-# trainingFerns("eiffel_tower.png")
+
 
 
 # image = readImage("eiffel_tower.png")
 # image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+
+# patch = image[-100:32,80:112]
+
+# cv2.imwrite("resuldfdt.png",patch)
+
 # keypoints = detectKeypoint(image)
 
 # x, y = keypoints[5]
@@ -193,7 +201,9 @@ def trainingFerns(imageName):
 
 
 
-# cv2.imwrite("result.png",path)
+# cv2.imwrite("result.png",patch)
+
+
 
 
 
