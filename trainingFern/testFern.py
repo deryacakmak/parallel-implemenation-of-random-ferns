@@ -16,7 +16,7 @@ def drawLine(matchResult, width, img_tmp):
         x1,y1 = i[1]
         x2,y2 = i[0][0], i[0][1] + width
         cv2.line(img_tmp, (y2, x2), (y1, x1), (0, 255, 0), thickness=1)
-    cv2.imwrite("result.png",img_tmp)
+    cv2.imwrite("resultfinal556.png",img_tmp)
     
 
 matchResult = classifyKeypoint("rotatedImage.png","eiffel_tower.png")
