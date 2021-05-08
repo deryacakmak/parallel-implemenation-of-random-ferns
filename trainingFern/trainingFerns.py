@@ -8,10 +8,12 @@ from affineDeformation import applyAffineDeformation
 
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 1
+NUM_OF_IMAGES_TO_GENERATES = 10000
 FERN_SIZE = 11
 FERN_NUM = 50
 K = pow(2,FERN_SIZE)
+allIndexList = None
+allProbablities = None
 
 def readImage(imageName):
     image = cv2.imread(imageName)
@@ -31,8 +33,9 @@ def applySmoothing(image):
 
 def detectKeypoint(image):
     image = np.float32(image)
-    dst = cv2.cornerHarris(image,2,3,0.04)
+    dst = cv2.cornerHarris(image,2,3,0.12)
     return np.argwhere(dst > 0.01 * dst.max())
+
 
 
 def findPatch(x, y, image, patchWidth = PATCH_WIDTH):
@@ -65,22 +68,37 @@ def checkIntensityOfPixel(I1, I2):
         return 1
     else:
         return 0
+    
 
-def extractFeature(patch ):
+def generateIndex():
+    end = (PATCH_WIDTH * PATCH_WIDTH) -1
+    indexList = []
+    for i in range(FERN_NUM):
+        fern = []
+        while(len(fern) != FERN_SIZE):
+            I1 = random.randint(0, end)
+            I2 = random.randint(0, end)
+            if abs(I1-I2) >3:
+                fern.append([I1, I2])
+        indexList.append(np.array(fern))
+    return  np.array(indexList)
+        
+def extractFeature(patch, index):
+    lenght = len(patch)
     features = []
-    end = patch.shape[0] -1
-    while(len(features) != FERN_SIZE):
-        I1 = random.randint(0, end)
-        I2 = random.randint(0, end)
-        if abs(I1-I2) >3:
-            features.append(checkIntensityOfPixel(patch[I1], patch[I2]))
-    return features
+    for i in index:
+        if i[0] < lenght and i[1] < lenght:
+            features.append(checkIntensityOfPixel(patch[i[0]], patch[i[1]]))
+    if len(features) != 0:
+        return int("".join(str(x) for x in features), 2)
+    else:
+        return -1
 
 
 def probablityDistrubition(classGraph, K):
     values = classGraph.values()
     N = sum(values)
-   # classGraph[-1] = 0
+    classGraph[-1] = 0
     for k in classGraph:
         Nkc = classGraph[k]
         classGraph[k] = (Nkc + REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)
@@ -93,7 +111,7 @@ def initializeClasses(keypoints):
         allProbablities[i] = dict()
         for j in range(K):
             allProbablities[i][j] = 0
-        
+        allProbablities[i][-1] = 0
     return np.array(allProbablities)
 
 
@@ -122,28 +140,29 @@ def findCoordinate(A, keypoints):
 
     
     
-def calculateCount(x, y, img, classNum, allProbablities):
-    patch = findPatch(x,y, img)
+def calculateCount(patch, classNum):
     classCount = allProbablities[classNum]
     for i in range(FERN_NUM):
-        fern = extractFeature(patch.flatten())
-        decimalNum =  int("".join(str(x) for x in fern), 2)
-        if(decimalNum in classCount ):
-            classCount[decimalNum] =  classCount[decimalNum] + 1
-        else:
-            classCount[decimalNum] = 1
+        index = allIndexList[i]
+        decimalNum = extractFeature(patch, index)
+        if decimalNum != -1:
+            if(decimalNum in classCount):
+                classCount[decimalNum] =  classCount[decimalNum] + 1
+            else:
+                classCount[decimalNum] = 1
 
     
  
 def trainingFerns(imageName):
     print("Training started!")
-    
+    global allProbablities
+    global allIndexList
     image = readImage(imageName)
     image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     # image = applySmoothing(addNoise(image))
-    keypoints = detectKeypoint(image)
+    keypoints = detectKeypoint(image)[:100]
     allProbablities = initializeClasses(keypoints)
-    
+    allIndexList = generateIndex()
 
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
         
@@ -152,8 +171,7 @@ def trainingFerns(imageName):
         warp_dst, matrixM = applyAffineDeformation(image)
         
         newKeypoints = findCoordinate(matrixM.flatten(), keypoints)
-     
-        
+      
         del matrixM
 
         print("deformed image!",i)
@@ -161,9 +179,12 @@ def trainingFerns(imageName):
         classNum = 0
         for keypoint in newKeypoints:
             
-            calculateCount(keypoint[1],  keypoint[0], warp_dst, classNum, allProbablities)
+            patch = findPatch(keypoint[1],keypoint[0], warp_dst).flatten()
+            
+            calculateCount(patch, classNum)
         
             classNum +=1
+        del warp_dst
             
     for i in range(len(allProbablities)):
         
@@ -171,10 +192,11 @@ def trainingFerns(imageName):
 
     
     print("Training done!")
-    return allProbablities, keypoints
+    return allProbablities, keypoints, allIndexList
 
 
 # trainingFerns("eiffel_tower.png")
+
 
 
         

@@ -16,13 +16,15 @@ def drawLine(matchResult, width, img_tmp):
         x1,y1 = i[1]
         x2,y2 = i[0][0], i[0][1] + width
         cv2.line(img_tmp, (y2, x2), (y1, x1), (0, 255, 0), thickness=1)
-    cv2.imwrite("resultfinal556.png",img_tmp)
+    cv2.imwrite("resultfinal751.png",img_tmp)
     
 
-matchResult = classifyKeypoint("rotatedImage.png","eiffel_tower.png")
+matchResult = classifyKeypoint("eiffel_tower.png","eiffel_tower.png")
 
-img = cv2.imread("concatanate.png")
+img = cv2.imread("concataneta2.png")
 img2 = cv2.imread("eiffel_tower.png")
+# im3 = hconcat_resize_min([img,img2], interpolation=cv2.INTER_CUBIC)
+# cv2.imwrite("concataneta3.png",im3)
 
 # img3 = cv2.imread("rotatedImage.png")
 
