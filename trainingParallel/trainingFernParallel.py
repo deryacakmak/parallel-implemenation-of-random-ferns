@@ -3,7 +3,7 @@ import random
 import numpy as np
 from skimage.util import random_noise
 from affineDeformation import applyAffineDeformation
-from findCoordinate import findCoordinate
+import kernelCalls as kc
 
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
@@ -32,7 +32,7 @@ def applySmoothing(image):
 
 def detectKeypoint(image):
     image = np.float32(image)
-    dst = cv2.cornerHarris(image,2,3,0.12)
+    dst = cv2.cornerHarris(image,2,3,0.04)
     return np.argwhere(dst > 0.01 * dst.max())
 
 
@@ -83,6 +83,32 @@ def findCoordinate2(A, keypoints):
     
     return newKeypoints
 
+def findPatch(x, y, image, patchWidth = PATCH_WIDTH):
+
+    patchSize =  int(PATCH_WIDTH /2)
+    width, height = image.shape[:2]
+    
+    startX = x - patchSize
+    endX =  x + patchSize
+
+    startY = y - patchSize
+    endY = y + patchSize
+
+    if(startX < 0  ):
+        startX = 0
+        
+    if (endX >= width ):
+        endX = width -1
+        
+    if(startY < 0 ):
+        startY = 0
+        
+    if (endY >= height):
+        endY = height -1
+
+    return image[startX:endX, startY:endY]
+
+
 def trainingFerns(imageName):
     print("Training started!")
     global allProbablities
@@ -100,13 +126,31 @@ def trainingFerns(imageName):
         
         warp_dst, matrixM = applyAffineDeformation(image)
 
-        newKeypoints = findCoordinate(matrixM, keypoints)
+        newKeypoints = kc.findCoordinate(matrixM, keypoints)[:1]
+        
+        print()
+        
+        out = kc.calculateCount(warp_dst, newKeypoints, PATCH_WIDTH)
         
         
-        for i in newKeypoints:
-          warp_dst[i[1]][i[0]] = 255
-        cv2.imwrite("resultfinal751.png",warp_dst)
-            
+        
+        image2 = findPatch(newKeypoints[0][1], newKeypoints[0][0], warp_dst)
+ 
+        print(image2)
+        
+        cv2.imwrite("resultfinal7514.png",image2)
+        cv2.imwrite("resultfinal7514sdvd.png",out)
+        
+        
+        
+        # for i in newKeypoints:
+        #   warp_dst[i[1]][i[0]] = 255
+        # cv2.imwrite("resultfinal751.png",warp_dst)
+        
+        
+        # for i in keypoints:
+        #   image[i[0]][i[1]] = 255
+        # cv2.imwrite("resultfinal7514.png",image)
 
         
         

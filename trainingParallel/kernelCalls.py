@@ -29,4 +29,35 @@ def findCoordinate(matrixM, keypoints):
         )
     
     return newKeypoints
+
+
+
+def calculateCount(image, keypoints, patchSize):
     
+    dim_block = len(keypoints)
+    
+    out = np.zeros((patchSize,patchSize)).astype(np.uint8)
+    
+    
+    patchSize = int(patchSize/2)
+    
+      
+    mod = compiler.SourceModule(open('calculateCount.cu').read())
+    
+    width, height = image.shape[:2]
+    
+    image = image.astype(np.uint8)
+            
+    affineDeformation = mod.get_function("calculateCount")
+    affineDeformation(
+    drv.In(keypoints),
+    drv.In(image),
+    drv.Out(out),
+    np.int32(patchSize),
+    np.int32(width),
+    np.int32(height),
+    block=(dim_block, 1, 1),
+    grid=(1, 1,1),
+        )
+    
+    return out
