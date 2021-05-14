@@ -8,8 +8,8 @@ import kernelCalls as kc
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
 NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 11
-FERN_NUM = 50
+FERN_SIZE = 3
+FERN_NUM = 5
 K = pow(2,FERN_SIZE)
 allIndexList = None
 allProbablities = None
@@ -32,7 +32,7 @@ def applySmoothing(image):
 
 def detectKeypoint(image):
     image = np.float32(image)
-    dst = cv2.cornerHarris(image,2,3,0.04)
+    dst = cv2.cornerHarris(image,2,3,0.12)
     return np.argwhere(dst > 0.01 * dst.max())
 
 
@@ -46,67 +46,17 @@ def generateIndex():
             I2 = random.randint(0, end)
             if abs(I1-I2) >3:
                 fern.append([I1, I2])
-        indexList.append(np.array(fern))
+        indexList  = indexList + fern;
     return  np.array(indexList)
 
 def initializeClasses(keypoints):
     allProbablities = [0] * len(keypoints)
     for i in range(len(keypoints)):
-        allProbablities[i] = dict()
+        allProbablities[i] = []
         for j in range(K):
-            allProbablities[i][j] = 0
+            allProbablities[i].append(0)
         allProbablities[i][-1] = 0
     return np.array(allProbablities)
-
-
-def findCoordinate2(A, keypoints):
-    
-    
-    newKeypoints = []
-    a00 = A[0]
-    a01 = A[1]
-    a10 = A[3]
-    a11 = A[4]
-    t0 = A[2]
-    t1 = A[5]   
-
-    for i in  range(len(keypoints)):
-        x = keypoints[i][1]
-        y = keypoints[i][0]
-        
-        print(x,y)
-        
-        x1 = int(a00*x + a01*y + t0)
-        y1 = int(a10*x + a11*y + t1)
-        
-        newKeypoints.append((x1,y1))
-    
-    return newKeypoints
-
-def findPatch(x, y, image, patchWidth = PATCH_WIDTH):
-
-    patchSize =  int(PATCH_WIDTH /2)
-    width, height = image.shape[:2]
-    
-    startX = x - patchSize
-    endX =  x + patchSize
-
-    startY = y - patchSize
-    endY = y + patchSize
-
-    if(startX < 0  ):
-        startX = 0
-        
-    if (endX >= width ):
-        endX = width -1
-        
-    if(startY < 0 ):
-        startY = 0
-        
-    if (endY >= height):
-        endY = height -1
-
-    return image[startX:endX, startY:endY]
 
 
 def trainingFerns(imageName):
@@ -116,7 +66,7 @@ def trainingFerns(imageName):
     image = readImage(imageName)
     image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     # image = applySmoothing(addNoise(image))
-    keypoints = detectKeypoint(image)
+    keypoints = detectKeypoint(image)[:10]
     allProbablities = initializeClasses(keypoints)
     allIndexList = generateIndex()
 
@@ -126,20 +76,10 @@ def trainingFerns(imageName):
         
         warp_dst, matrixM = applyAffineDeformation(image)
 
-        newKeypoints = kc.findCoordinate(matrixM, keypoints)[:1]
+        newKeypoints = kc.findCoordinate(matrixM, keypoints)[:10]
         
-        print()
+        kc.calculateCount(warp_dst, newKeypoints, PATCH_WIDTH, allProbablities, allIndexList)
         
-        out = kc.calculateCount(warp_dst, newKeypoints, PATCH_WIDTH)
-        
-        
-        
-        image2 = findPatch(newKeypoints[0][1], newKeypoints[0][0], warp_dst)
- 
-        print(image2)
-        
-        cv2.imwrite("resultfinal7514.png",image2)
-        cv2.imwrite("resultfinal7514sdvd.png",out)
         
         
         
