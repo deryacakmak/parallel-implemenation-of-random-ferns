@@ -9,8 +9,8 @@ from affineDeformation import applyAffineDeformation
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
 NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 11
-FERN_NUM = 50
+FERN_SIZE = 3
+FERN_NUM = 5
 K = pow(2,FERN_SIZE)
 allIndexList = None
 allProbablities = None
@@ -87,10 +87,14 @@ def generateIndex():
 def extractFeature(patch, index):
     lenght = len(patch)
     features = []
+ 
     for i in index:
+        
         if i[0] < lenght and i[1] < lenght:
             features.append(checkIntensityOfPixel(patch[i[0]], patch[i[1]]))
     if len(features) != 0:
+
+        
         return int("".join(str(x) for x in features), 2)
     else:
         return -1
@@ -146,6 +150,7 @@ def calculateCount(patch, classNum):
     for i in range(FERN_NUM):
         index = allIndexList[i]
         decimalNum = extractFeature(patch, index)
+        #print(decimalNum)
         if decimalNum != -1:
             if(decimalNum in classCount):
                 classCount[decimalNum] =  classCount[decimalNum] + 1
@@ -154,28 +159,28 @@ def calculateCount(patch, classNum):
 
     
  
-def trainingFerns(imageName):
+def trainingFerns(imageName, allIndexList2, keypoints,newKeypoints, warp_dst ):
     print("Training started!")
     global allProbablities
     global allIndexList
     image = readImage(imageName)
     image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
     # image = applySmoothing(addNoise(image))
-    keypoints = detectKeypoint(image)[:100]
+    keypoints = keypoints
     allProbablities = initializeClasses(keypoints)
-    allIndexList = generateIndex()
+    allIndexList = allIndexList2
 
     for i in range(NUM_OF_IMAGES_TO_GENERATES):
         
         print("generate image",i)
         
-        warp_dst, matrixM = applyAffineDeformation(image)
+        #warp_dst, matrixM = applyAffineDeformation(image)
         
-        newKeypoints = findCoordinate(matrixM.flatten(), keypoints)
+        #newKeypoints = findCoordinate(matrixM.flatten(), keypoints)
       
-        del matrixM
+        # del matrixM
 
-        print("deformed image!",i)
+        # print("deformed image!",i)
         
         classNum = 0
         for keypoint in newKeypoints:
@@ -187,16 +192,16 @@ def trainingFerns(imageName):
             classNum +=1
         del warp_dst
             
-    for i in range(len(allProbablities)):
+    # for i in range(len(allProbablities)):
         
-        allProbablities[i] = probablityDistrubition(allProbablities[i],K)
+    #     allProbablities[i] = probablityDistrubition(allProbablities[i],K)
 
     
     print("Training done!")
-    return allProbablities, keypoints, allIndexList
+    return allProbablities
 
 
-trainingFerns("eiffel_tower.png")
+# trainingFerns("eiffel_tower.png")
 
 
 
