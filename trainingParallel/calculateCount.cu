@@ -1,9 +1,6 @@
-__global__ void calculateCount(int *keypoints ,const unsigned char  *in, int *allProbablities,  int *allIndexList, int patchSize, int width, int height, int fernNum, int fernSize){
+__global__ void calculateCount(int *keypoints ,const unsigned char  *in, int *allProbablities,  int *allIndexList, int patchSize, int width, int height, int fernNum, int fernSize, int lenght){
 
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    //int index2 = index*2+1;
-    //printf("%d %d\n", allIndexList[index*2], allIndexList[index2]);
+    int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
     int y = keypoints[index*2];
     int x = keypoints[index*2+1];
@@ -35,7 +32,7 @@ __global__ void calculateCount(int *keypoints ,const unsigned char  *in, int *al
     }
 
    int patchHeight = endX - startX;
-  
+   int patchLenght = patchHeight * (endY - startY);
 
    int patch[1024];
 
@@ -48,13 +45,23 @@ __global__ void calculateCount(int *keypoints ,const unsigned char  *in, int *al
         }
         startX = startX +1;
     }
-    /*count = 0;
-    int decimalNum = 0;
+
+    int I1, I2,num, decimalNum;
     for(int i = 0; i< fernNum ; i++){
+        decimalNum = 0;
+        num = 1;
         for(int j = 0; j < fernSize; j++){
-                
+             I1 = allIndexList[fernSize*i*2+(j*2)];
+             I2 = allIndexList[fernSize*i*2+(j*2)+1];
+            if(I1 <  patchLenght && I2 < patchLenght){
+                if(patch[I1] < patch[I2]){
+                    decimalNum = decimalNum +num;
+                }
+                num = num *2;
+            }     
         }
-    }*/
+        allProbablities[index*lenght+decimalNum] = allProbablities[index*lenght+decimalNum]+ 1;  
+    }
    
 
 }
