@@ -32,7 +32,7 @@ def findCoordinate(matrixM, keypoints):
 
 
 
-def calculateCount(image, keypoints, patchSize, allProbablities, allIndexList, fernNum, fernSize):
+def calculateCount(image, keypoints, patchSize, allProbablities, allIndexList, fernNum, fernSize, REGULARIZATION_TERM):
     
     dim_block = len(keypoints)
     
@@ -51,7 +51,7 @@ def calculateCount(image, keypoints, patchSize, allProbablities, allIndexList, f
     
     allIndexList = allIndexList.astype(np.int32)
     
-    allProbablities = allProbablities.astype(np.int32)
+    allProbablities = allProbablities.astype(np.float32)
             
     affineDeformation = mod.get_function("calculateCount")
     affineDeformation(
@@ -65,6 +65,7 @@ def calculateCount(image, keypoints, patchSize, allProbablities, allIndexList, f
     np.int32(fernNum),
     np.int32(fernSize),
     np.int32(pow(2,fernSize)),
+    np.int32(REGULARIZATION_TERM),
     block=(dim_block, 1, 1),
     grid=(1, 1,1),
         )

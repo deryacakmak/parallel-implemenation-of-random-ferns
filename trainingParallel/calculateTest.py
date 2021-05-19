@@ -192,9 +192,9 @@ def trainingFerns(imageName, allIndexList2, keypoints,newKeypoints, warp_dst ):
             classNum +=1
         del warp_dst
             
-    # for i in range(len(allProbablities)):
+    for i in range(len(allProbablities)):
         
-    #     allProbablities[i] = probablityDistrubition(allProbablities[i],K)
+        allProbablities[i] = probablityDistrubition(allProbablities[i],K)
 
     
     print("Training done!")
