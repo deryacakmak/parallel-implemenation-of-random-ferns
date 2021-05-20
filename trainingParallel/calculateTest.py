@@ -9,7 +9,7 @@ from affineDeformation import applyAffineDeformation
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
 NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 3
+FERN_SIZE = 4
 FERN_NUM = 5
 K = pow(2,FERN_SIZE)
 allIndexList = None
@@ -103,7 +103,6 @@ def extractFeature(patch, index):
 def probablityDistrubition(classGraph, K):
     values = classGraph.values()
     N = sum(values)
-    classGraph[-1] = 0
     for k in classGraph:
         Nkc = classGraph[k]
         classGraph[k] = (Nkc + REGULARIZATION_TERM) / (N + K * REGULARIZATION_TERM)

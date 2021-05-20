@@ -4,11 +4,12 @@ import numpy as np
 from skimage.util import random_noise
 from affineDeformation import applyAffineDeformation
 import kernelCalls as kc
+import calculateTest as c
 
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
 NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 3
+FERN_SIZE = 4
 FERN_NUM = 5
 K = pow(2,FERN_SIZE)
 allIndexList = None
@@ -83,7 +84,16 @@ def trainingFerns(imageName):
         
         allProbablities = kc.calculateCount(warp_dst, newKeypoints, PATCH_WIDTH, allProbablities, allIndexList, FERN_NUM, FERN_SIZE, REGULARIZATION_TERM)
 
-trainingFerns("eiffel_tower.png")      
+        # print(allProbablities[2])
+        
+        # print("*******")
+        
+        # print((c.trainingFerns(imageName, allIndexList2, keypoints,newKeypoints, warp_dst ))[2])
+        
+        
+        return allProbablities, keypoints, allIndexList
+
+# trainingFerns("eiffel_tower.png")      
         
         
        

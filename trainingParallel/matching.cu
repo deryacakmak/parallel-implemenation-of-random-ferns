@@ -1,9 +1,9 @@
-__global__ void calculateCount(int *keypoints ,const unsigned char  *in, float *allProbablities,  int *allIndexList, int patchSize, int width, int height, int fernNum, int fernSize, int lenght, int REGULARIZATION_TERM){
+__global__ void matching(int *keypoints ,const unsigned char  *in, int *allProbablities, int *allIndexList,  int *matchingResult ,int patchSize, int width, int height, int lenght, int fernNum, int fernSize, int patchLenght){
 
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
 
-    int y = keypoints[index*2];
-    int x = keypoints[index*2+1];
+    int x = keypoints[index*2];
+    int y = keypoints[index*2+1];
 
     int startX = x - patchSize;
     int endX = x + patchSize;
@@ -31,10 +31,9 @@ __global__ void calculateCount(int *keypoints ,const unsigned char  *in, float *
         endY = height -1;
     }
 
-   int patchHeight = endX - startX;
-   int patchLenght = patchHeight * (endY - startY);
-
-   int patch[1024];
+   int patchHeight = endY - startY;
+   
+    int patch[1024];
 
 
     int count = 0;
@@ -46,7 +45,10 @@ __global__ void calculateCount(int *keypoints ,const unsigned char  *in, float *
         startX = startX +1;
     }
 
-    int I1, I2,num, decimalNum, index2;
+    
+    int result[250];
+
+        int I1, I2,num, decimalNum, index2;
     for(int i = 0; i< fernNum ; i++){
         decimalNum = 0;
         num = lenght/2;
@@ -63,14 +65,23 @@ __global__ void calculateCount(int *keypoints ,const unsigned char  *in, float *
             } 
              
         }
-       allProbablities[index*lenght+decimalNum] = allProbablities[index*lenght+decimalNum]+ 1; 
+        for(int j = 0; j< 250; j++){
+            result[j] = result[j] + logf(allProbablities[j*lenght+decimalNum]);
+        }
+
     }
-    
-    for(int i = 0; i< lenght; i++){
-            float num2 = allProbablities[index*lenght+i];
-            float value = (num2 + REGULARIZATION_TERM) / (fernNum + lenght*REGULARIZATION_TERM);
-            allProbablities[index*lenght+i] = value;
-            
+
+    num = result[0];
+    index2 = 0;
+    for(int k = 1; k < 250; k++){
+        decimalNum = result[0];
+        if( decimalNum> num ){
+            num = decimalNum;
+            index2 = k;
+        }
     }
-   
+
+  matchingResult[index] = index2;
+
+
 }

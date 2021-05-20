@@ -71,3 +71,44 @@ def calculateCount(image, keypoints, patchSize, allProbablities, allIndexList, f
         )
     
     return allProbablities
+
+
+def matching(image, keypoints, patchSize):
+    
+    
+    
+    dim_block = len(keypoints)
+    
+    out = np.zeros((32,32)).astype(np.int32)
+    
+    mod = compiler.SourceModule(open('matching.cu').read())
+    
+    height, width = image.shape[:2]
+    
+    image = image.astype(np.uint8)
+    
+    keypoints = keypoints.astype(np.int32)
+    
+            
+    affineDeformation = mod.get_function("matching")
+    affineDeformation(
+    drv.In(keypoints),
+    drv.In(image),
+    drv.Out(out),
+    np.int32(patchSize),
+    np.int32(height),
+    np.int32(width),
+    block=(dim_block, 1, 1),
+    grid=(1, 1,1),
+        )
+
+
+    return out
+
+
+
+
+
+
+
+
