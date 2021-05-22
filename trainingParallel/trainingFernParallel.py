@@ -8,13 +8,20 @@ import calculateTest as c
 
 PATCH_WIDTH = 32
 REGULARIZATION_TERM = 1
-NUM_OF_IMAGES_TO_GENERATES = 1
-FERN_SIZE = 4
-FERN_NUM = 5
+NUM_OF_IMAGES_TO_GENERATES = 10000
+FERN_SIZE = 11
+FERN_NUM = 50
 K = pow(2,FERN_SIZE)
 allIndexList = None
 allProbablities = None
 allIndexList2 = []
+
+
+def getPatchSize():
+    return PATCH_WIDTH
+
+def getFernSize():
+    return FERN_SIZE;
 
 
 def readImage(imageName):

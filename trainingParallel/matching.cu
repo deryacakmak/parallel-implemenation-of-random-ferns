@@ -1,7 +1,7 @@
-__global__ void matching(int *keypoints ,const unsigned char  *in, int *allProbablities, int *allIndexList,  int *matchingResult ,int patchSize, int width, int height, int lenght, int fernNum, int fernSize, int patchLenght){
+__global__ void matching(int *keypoints ,const unsigned char  *in, int *allProbablities, int *allIndexList,  int *matchingResult , int width, int height, int lenght, int fernNum, int fernSize, int patchLenght){
 
     int index = blockIdx.x * blockDim.x + threadIdx.x; 
-
+    int patchSize =(int)(patchLenght /2);
     int x = keypoints[index*2];
     int y = keypoints[index*2+1];
 
@@ -32,6 +32,8 @@ __global__ void matching(int *keypoints ,const unsigned char  *in, int *allProba
     }
 
    int patchHeight = endY - startY;
+   int patcWidth = endX - endY;
+   int size = patchHeight*patcWidth;
    
     int patch[1024];
 
@@ -48,7 +50,7 @@ __global__ void matching(int *keypoints ,const unsigned char  *in, int *allProba
     
     int result[250];
 
-        int I1, I2,num, decimalNum, index2;
+    int I1, I2,num, decimalNum, index2;
     for(int i = 0; i< fernNum ; i++){
         decimalNum = 0;
         num = lenght/2;
@@ -56,7 +58,7 @@ __global__ void matching(int *keypoints ,const unsigned char  *in, int *allProba
              index2 = (fernSize*i*2)+(j*2);
              I1 = allIndexList[index2];
              I2 = allIndexList[index2+1];
-            if(I1 <  patchLenght && I2 < patchLenght){
+            if(I1 <  size && I2 < size){
                 if(patch[I1] < patch[I2]){
                     decimalNum = decimalNum +num;
                 }
@@ -74,7 +76,7 @@ __global__ void matching(int *keypoints ,const unsigned char  *in, int *allProba
     num = result[0];
     index2 = 0;
     for(int k = 1; k < 250; k++){
-        decimalNum = result[0];
+        decimalNum = result[k];
         if( decimalNum> num ){
             num = decimalNum;
             index2 = k;
